@@ -1,0 +1,9 @@
+#!/bin/bash
+echo &quot;========================================= Upload to Unstable ===========================================&quot;
+
+cd build
+ls -l squeeze-amd64/
+
+ls -l
+ls -l ../
+bash ../ci-steps/upload-debs --unstable

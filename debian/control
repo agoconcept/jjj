@@ -1,0 +1,15 @@
+Source: spotify-jjj
+Section: non-free/web
+Priority: extra
+Maintainer: Santi Gallego <santi@spotify.com>
+Build-Depends:
+        debhelper (>= 7),
+Standards-Version: 3.7.2
+XS-Python-Version: >= 2.6
+
+Package: spotify-jjj
+Description: Jenkins Jazzy Jobs
+Architecture: any
+Depends:
+        git,
+

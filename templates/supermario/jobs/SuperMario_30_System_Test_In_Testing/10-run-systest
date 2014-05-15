@@ -1,0 +1,4 @@
+#!/bin/bash
+echo &quot;========================================= Execute system tests on test host ===========================================&quot;
+# we cannot run fabric inside of fabric, so we have to ssh instead... 
+sudo -u deployify ssh -A testserver nosetests --with-xunit /usr/share/spotify-deployment-scripts/tests/systest/ 

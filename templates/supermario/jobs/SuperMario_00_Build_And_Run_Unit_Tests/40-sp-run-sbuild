@@ -1,0 +1,13 @@
+#!/bin/bash
+#set -e
+pwd
+echo
+echo &quot;========================================= sp_run_sbuild.sh =========================================&quot;
+cd build
+/usr/bin/sp_run_sbuild.sh amd64 squeeze unstable apt
+RES=$?
+
+ls -l
+ls -l squeeze-amd64
+
+exit $RES

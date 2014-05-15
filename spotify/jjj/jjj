@@ -1,0 +1,72 @@
+#! /usr/bin/python
+
+"""
+Based on mako-render, but added --lookup_dir parameter to support multiple
+directories for looking up the templates
+
+Also added the option to load data from en external file
+"""
+
+
+def load_config(config_file):
+    import json
+
+    json_data = open(config_file)
+    data = json.load(json_data)
+    json_data.close()
+
+    return data
+
+
+def render(data, filename, lookup_dir, config, kw):
+    from mako.template import Template
+    from mako.lookup import TemplateLookup
+
+    lookup = TemplateLookup(lookup_dir)
+    return Template(data, filename, lookup=lookup).render(config=config, **kw)
+
+
+def varsplit(var):
+    if "=" not in var:
+        return (var, "")
+    return var.split("=", 1)
+
+
+def main(argv=None):
+    from os.path import isfile
+    from sys import stdin
+
+    if argv is None:
+        import sys
+        argv = sys.argv
+
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser(description="usage: jjj [FILENAME]")
+    parser.add_argument("-v", "--var", default=[], action="append",
+                        help="variable (can be used multiple times, use name=value)")
+    parser.add_argument("-l", "--lookup_dir", default=["."], action="append",
+                        help="lookup directories (can be used multiple times)")
+    parser.add_argument("-c", "--config_file", default="", action="store",
+                        help="configuration file")
+    parser.add_argument("filename", action="store",
+                        help="template file")
+
+    args = parser.parse_args()
+
+    if (args.filename == "-"):
+        fo = stdin
+    else:
+        if not isfile(args.filename):
+            raise SystemExit("error: can't find %s" % args.filename)
+        fo = open(args.filename)
+
+    # Load the configuration from a external file
+    config = load_config(args.config_file)
+
+    kw = dict([varsplit(var) for var in args.var])
+    data = fo.read()
+    print(render(data, args.filename, args.lookup_dir, config, kw))
+
+if __name__ == "__main__":
+    main()

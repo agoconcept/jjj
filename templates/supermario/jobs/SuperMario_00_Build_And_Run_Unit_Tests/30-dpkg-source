@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo &quot;========================================= dpkg-source ===========================================&quot;
+pwd
+env
+
+#set -e
+cd build
+dpkg-source -b --compression-level=5 --format=&quot;1.0&quot; $WORKSPACE/src
+RES=$?
+ls -l
+
+exit $RES

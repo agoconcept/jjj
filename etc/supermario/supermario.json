@@ -1,0 +1,114 @@
+{
+  "description":          "my description",
+  "git repository":       "git@ghe.spotify.net:supermario/deployment-scripts.git",
+  "slaves": [
+    {
+      "name":             "ssh-slave-1",
+      "description":      "SSH slave 1",
+      "label":            "order",
+      "host":             "pod1-jenkinsslave-a001.supermario.cloud.spotify.net"
+    },
+    {
+      "name":             "ssh-slave-2",
+      "description":      "SSH slave 2",
+      "label":            "order",
+      "host":             "pod1-jenkinsslave-a002.supermario.cloud.spotify.net"
+    }
+  ],
+  "build pipeline": {
+    "name":               "deployment-scripts pipeline",
+    "number of builds":   5,
+    "first job":          "SuperMario_00_Build_And_Run_Unit_Tests"
+  },
+  "jobs": {
+    "SuperMario_00_Build_And_Run_Unit_Tests": {
+      "node": "order",
+      "checkout directory": "src",
+      "poll scm": "H/5 * * * *",
+      "tasks": [
+        {
+          "type": "shell",
+          "commands": "10-ci-make-package-version"
+        },
+        {
+          "type": "shell",
+          "commands": "20-set-up-build"
+        },
+        {
+          "type": "shell",
+          "commands": "30-dpkg-source"
+        },
+        {
+          "type": "shell",
+          "commands": "40-sp-run-sbuild"
+        }
+      ],
+      "trigger": "SuperMario_10_Upload_Debian_Package",
+      "check for failures": true,
+      "archive artifacts": "build/*, build/squeeze-amd64/*",
+      "mail recipients": ""
+    },
+    "SuperMario_10_Upload_Debian_Package": {
+      "node": "order",
+      "checkout directory": null,
+      "poll scm": null,
+      "tasks": [
+        {
+          "type": "shell",
+          "commands": "10-cleanup"
+        },
+        {
+          "type": "copy artifact",
+          "source": "SuperMario_00_Build_And_Run_Unit_Tests"
+        },
+        {
+          "type": "shell",
+          "commands": "20-upload-unstable"
+        }
+      ],
+      "trigger": "SuperMario_20_Deploy_To_Testing",
+      "check for failures": false,
+      "archive artifacts": null,
+      "mail recipients": "supermario@spotify.com"
+    },
+    "SuperMario_20_Deploy_To_Testing": {
+      "node": "order",
+      "checkout directory": null,
+      "poll scm": null,
+      "tasks": [
+        {
+          "type": "shell",
+          "commands": "10-cleanup"
+        },
+        {
+          "type": "copy artifact",
+          "source": "SuperMario_00_Build_And_Run_Unit_Tests"
+        },
+        {
+          "type": "shell",
+          "commands": "20-deploy-to-test"
+        }
+      ],
+      "trigger": "SuperMario_30_System_Test_In_Testing",
+      "check for failures": false,
+      "archive artifacts": null,
+      "mail recipients": "supermario@spotify.com"
+    },
+    "SuperMario_30_System_Test_In_Testing": {
+      "node": "order",
+      "checkout directory": null,
+      "poll scm": null,
+      "tasks": [
+        {
+          "type": "shell",
+          "commands": "10-run-systest"
+        }
+      ],
+      "trigger": null,
+      "check for failures": false,
+      "archive artifacts": null,
+      "mail recipients": "supermario@spotify.com"
+    }
+  }
+}
+
